@@ -1,0 +1,20 @@
+{
+  "game_description": "A tower defense game where players strategically place defensive towers to protect against waves of enemies. Players manage resources (money), maintain lives, and must survive five increasingly difficult waves to win.",
+  "game_theme": "minimalist geometric",
+  "assets": [
+    {
+      "name": "defense_tower",
+      "visual_prompt": "A [top-down] of a [square blue defensive structure with a thin circular range indicator], designed in a clean, stylized digital art style. Flat colors only, no gradients, no shadows, no textures, no reflections, no background elements. Iconic, simplified shapes with bold outlines or clean edges. Pure white background. Designed for pixel-perfect clarity and easy silhouette recognition. No text or visual effects.",
+      "type": "character",
+      "style": "game_asset",
+      "dimensions": [512, 512]
+    },
+    {
+      "name": "enemy_unit",
+      "visual_prompt": "A [top-down] of a [small red circular hostile unit], designed in a clean, stylized digital art style. Flat colors only, no gradients, no shadows, no textures, no reflections, no background elements. Iconic, simplified shapes with bold outlines or clean edges. Pure white background. Designed for pixel-perfect clarity and easy silhouette recognition. No text or visual effects.",
+      "type": "character",
+      "style": "game_asset",
+      "dimensions": [512, 512]
+    }
+  ]
+} 
