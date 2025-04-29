@@ -91,6 +91,28 @@
                     </div>
                 </div>
 
+                <!-- Style Selector -->
+                <div class="bg-gray-50 p-4 rounded-lg space-y-4">
+                    <h3 class="text-lg font-medium text-gray-900">Art Style</h3>
+                    <div class="relative">
+                        <select id="artStyle" 
+                                class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+                            <option value="cartoon" selected>Cartoon (Clean, flat colors with bold outlines)</option>
+                            <option value="realistic" disabled>Realistic (Coming soon)</option>
+                            <option value="watercolor" disabled>Watercolor (Coming soon)</option>
+                            <option value="vector" disabled>Vector Art (Coming soon)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1">
+                        More styles will be available in future updates.
+                    </p>
+                </div>
+
                 <!-- Pixel Art Controls -->
                 <div class="bg-gray-50 p-4 rounded-lg space-y-4">
                     <h3 class="text-lg font-medium text-gray-900">Pixel Art Settings</h3>
@@ -229,23 +251,68 @@
                 const card = document.createElement('div');
                 card.className = 'asset-card';
                 
-                const img = document.createElement('img');
-                img.src = asset.url;
-                img.alt = asset.name;
+                // Create comparison container
+                const comparisonContainer = document.createElement('div');
+                comparisonContainer.className = 'flex flex-col md:flex-row gap-4 mb-4';
+                
+                // Original image container
+                if (asset.original_url) {
+                    const originalContainer = document.createElement('div');
+                    originalContainer.className = 'flex-1';
+                    
+                    const originalTitle = document.createElement('p');
+                    originalTitle.className = 'text-sm font-medium mb-2';
+                    originalTitle.textContent = 'Original';
+                    
+                    const originalImg = document.createElement('img');
+                    originalImg.src = asset.original_url;
+                    originalImg.alt = `Original ${asset.name}`;
+                    originalImg.className = 'w-full';
+                    
+                    const originalDownload = document.createElement('a');
+                    originalDownload.href = asset.original_url;
+                    originalDownload.download = `original_${asset.name}`;
+                    originalDownload.className = 'inline-block bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm mt-2 hover:bg-gray-300';
+                    originalDownload.textContent = 'Download Original';
+                    
+                    originalContainer.appendChild(originalTitle);
+                    originalContainer.appendChild(originalImg);
+                    originalContainer.appendChild(originalDownload);
+                    comparisonContainer.appendChild(originalContainer);
+                }
+                
+                // Pixelated image container
+                if (asset.pixelated_url) {
+                    const pixelatedContainer = document.createElement('div');
+                    pixelatedContainer.className = 'flex-1';
+                    
+                    const pixelatedTitle = document.createElement('p');
+                    pixelatedTitle.className = 'text-sm font-medium mb-2';
+                    pixelatedTitle.textContent = 'Pixelated';
+                    
+                    const pixelatedImg = document.createElement('img');
+                    pixelatedImg.src = asset.pixelated_url;
+                    pixelatedImg.alt = `Pixelated ${asset.name}`;
+                    pixelatedImg.className = 'w-full';
+                    
+                    const pixelatedDownload = document.createElement('a');
+                    pixelatedDownload.href = asset.pixelated_url;
+                    pixelatedDownload.download = asset.name;
+                    pixelatedDownload.className = 'inline-block bg-blue-600 text-white px-3 py-1 rounded-md text-sm mt-2 hover:bg-blue-700';
+                    pixelatedDownload.textContent = 'Download Pixelated';
+                    
+                    pixelatedContainer.appendChild(pixelatedTitle);
+                    pixelatedContainer.appendChild(pixelatedImg);
+                    pixelatedContainer.appendChild(pixelatedDownload);
+                    comparisonContainer.appendChild(pixelatedContainer);
+                }
                 
                 const name = document.createElement('p');
-                name.className = 'text-sm font-medium';
-                name.textContent = asset.name;
+                name.className = 'text-lg font-medium mb-2';
+                name.textContent = asset.name.replace('.png', '');
                 
-                const downloadBtn = document.createElement('a');
-                downloadBtn.href = asset.url;
-                downloadBtn.download = asset.name;
-                downloadBtn.className = 'inline-block bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm mt-2 hover:bg-gray-300';
-                downloadBtn.textContent = 'Download';
-                
-                card.appendChild(img);
                 card.appendChild(name);
-                card.appendChild(downloadBtn);
+                card.appendChild(comparisonContainer);
                 assetGrid.appendChild(card);
             });
         }
@@ -285,6 +352,10 @@
                 colorCount: parseInt(document.getElementById('colorCount').value)
             };
             formData.append('pixel_art_settings', JSON.stringify(pixelArtSettings));
+
+            // Add art style to the form data
+            const artStyle = document.getElementById('artStyle').value;
+            formData.append('art_style', artStyle);
 
             try {
                 // Close existing EventSource if any

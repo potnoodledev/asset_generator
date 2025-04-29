@@ -71,6 +71,12 @@ def upload_file():
         with open(settings_path, 'w') as f:
             f.write(pixel_art_settings)
 
+    # Save art style if provided
+    art_style = request.form.get('art_style', 'cartoon')
+    style_path = os.path.join(UPLOAD_FOLDER, 'style_settings.json')
+    with open(style_path, 'w') as f:
+        json.dump({'style': art_style}, f)
+
     return jsonify({'message': 'File uploaded successfully'})
 
 def generate_assets(config_path):
@@ -81,10 +87,22 @@ def generate_assets(config_path):
         
         # Load pixel art settings if they exist
         settings_path = os.path.join(UPLOAD_FOLDER, 'pixel_settings.json')
-        pixel_settings = {}
+        pixel_settings = {
+            'enabled': True,
+            'gridSize': 6,
+            'colorCount': 8
+        }
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 pixel_settings = json.load(f)
+
+        # Load art style settings if they exist
+        style_path = os.path.join(UPLOAD_FOLDER, 'style_settings.json')
+        art_style = "cartoon"  # default style
+        if os.path.exists(style_path):
+            with open(style_path, 'r') as f:
+                style_data = json.load(f)
+                art_style = style_data.get('style', 'cartoon')
         
         # Capture stdout to get progress messages
         output_capture = OutputCapture()
@@ -94,13 +112,14 @@ def generate_assets(config_path):
         with open(config_path, 'r') as f:
             config = json.load(f)
         
-        # Process assets and collect progress
+        # Process assets with pixel art settings and art style
         process_assets(
             config, 
             OUTPUT_FOLDER,
             enable_pixelation=pixel_settings.get('enabled', True),
             grid_size=pixel_settings.get('gridSize', 6),
-            color_count=pixel_settings.get('colorCount', 8)
+            color_count=pixel_settings.get('colorCount', 8),
+            art_style=art_style
         )
         
         # Restore stdout
@@ -127,10 +146,35 @@ def get_generated_assets():
             if file.endswith('.png'):
                 relative_path = os.path.relpath(root, OUTPUT_FOLDER)
                 asset_path = os.path.join(relative_path, file)
-                assets.append({
-                    "name": file,
-                    "url": f"/assets/{asset_path}"
-                })
+                
+                # Skip the main directory copies (we'll use the organized ones)
+                if relative_path == '.':
+                    continue
+                    
+                # Determine if this is an original or pixelated version
+                is_original = 'originals' in root
+                base_name = file.replace('_original.png', '.png')
+                
+                # Find or create asset entry
+                asset_entry = next(
+                    (a for a in assets if a["name"] == base_name), 
+                    None
+                )
+                
+                if asset_entry is None:
+                    asset_entry = {
+                        "name": base_name,
+                        "original_url": None,
+                        "pixelated_url": None
+                    }
+                    assets.append(asset_entry)
+                
+                # Add URL to appropriate field
+                if is_original:
+                    asset_entry["original_url"] = f"/assets/{asset_path}"
+                else:
+                    asset_entry["pixelated_url"] = f"/assets/{asset_path}"
+                    
     return assets
 
 @app.route('/generate')

@@ -27,7 +27,6 @@ wheels/
 venv/
 ENV/
 env/
-.env/
 
 # IDE
 .idea/
@@ -41,4 +40,10 @@ Thumbs.db
 
 # Generated files
 *.png
-!example_outputs/*.png 
+!example_outputs/*.png
+
+# Project specific
+uploads/*
+!uploads/.gitkeep
+game/output/*
+!game/output/.gitkeep 
